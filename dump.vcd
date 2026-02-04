@@ -1,0 +1,87 @@
+$date
+	Fri Jun  7 20:58:52 2024
+$end
+$version
+	QuestaSim Version 2023.3
+$end
+$timescale
+	1ns
+$end
+
+$scope module tb $end
+
+$scope module DUT $end
+
+$scope module a $end
+$var parameter 160 ! FILE_NAME $end
+$upscope $end
+
+$scope module b $end
+$var reg 32 " read_data_2 [31:0] $end
+$upscope $end
+
+$scope module d $end
+$var parameter 160 # FILE_NAME $end
+$upscope $end
+$upscope $end
+$upscope $end
+
+$scope begin mips_pkg $end
+$var parameter 32 $ IMM_SIZE $end
+$var parameter 32 % op_code $end
+$var parameter 32 & reg_num $end
+$var parameter 32 ' DATA $end
+$var parameter 32 ( adddr_width $end
+$var parameter 32 ) reg_width $end
+$var parameter 32 * memdepth $end
+$var parameter 32 + memwidth $end
+$var parameter 32 , instr_width $end
+$var parameter 32 - BPI $end
+$var integer 32 . InstructionCount $end
+$var integer 32 / ArithmeticInstrCount $end
+$var integer 32 0 LogicalInstrCount $end
+$var integer 32 1 MemoryInstrCount $end
+$var integer 32 2 BranchInstrCount $end
+$var reg 4096 3 MemWriteStatus [4095:0] $end
+
+$scope task CountInstruction $end
+$upscope $end
+
+$scope task CountArithmeticInstruction $end
+$upscope $end
+
+$scope task CountLogicalInstruction $end
+$upscope $end
+
+$scope task CountMemoryInstruction $end
+$upscope $end
+
+$scope task CountBranchInstruction $end
+$upscope $end
+$upscope $end
+
+$scope begin std $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+bx 3
+bx "
+b10000 $
+b110 %
+b100000 &
+b100000 '
+b100000 (
+b101 )
+b1000000000000 *
+b1000 +
+b100000 ,
+b100 -
+b110011001101001011011100110000101101100010111110111000001110010011011110110101001011111011101000111001001100001011000110110010100101110011101000111100001110100 !
+b110011001101001011011100110000101101100010111110111000001110010011011110110101001011111011101000111001001100001011000110110010100101110011101000111100001110100 #
+b0 .
+b0 /
+b0 0
+b0 1
+b0 2
+$end
