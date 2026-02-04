@@ -1,32 +1,20 @@
 `include "mipspkg.sv"
+module WriteBack(clk,write_back_data, mem_data_o , cntrl, wb_data ,halt_signal);
+  import TYPES::*;
 
-module WriteBack(clock, instruction, memory_read, write_back_data, memory_data_o , cntrl, wb_data ,halt_detected, wb_read);
-  import Types::*;
-  
-  input logic clock;
-  input Instruct instruction;
-  input logic [reg_width-1:0] memory_read;
+  input logic clk;
   input logic [DATA-1:0] write_back_data;
-  input logic [DATA-1:0] memory_data_o;
-  input Control cntrl;
-  input logic halt_detected;
+  input logic [DATA-1:0] mem_data_o;
+  input CTRL cntrl;
+  input logic halt_signal;
   output logic [DATA-1:0] wb_data;
-  output logic [reg_width-1:0] wb_read;
   
-  always_comb
-  begin 
-  if(cntrl.wbMux)
-  wb_data = write_back_data;
-  else
-  wb_data = memory_data_o;
-  end
-
-  assign wb_read = memory_read;
+  assign wb_data = (cntrl.wbMux) ? write_back_data:mem_data_o;
   
   always_comb
     begin
-      if(halt_detected)
-        $finish;  
-    end
-	
+      if(halt_signal)
+        $finish;
+  end
+
 endmodule

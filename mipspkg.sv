@@ -4,27 +4,31 @@
 `ifndef MIPS_LITE
 `define MIPS_LITE
 
-package Types;
-parameter imm_size=16;
+package TYPES;
+
+parameter IMM_SIZE=16;
 parameter op_code =6;
-parameter register_num= 32;
+parameter reg_num= 32;
 parameter DATA = 32;
-parameter add_width=32;
-localparam reg_width = $clog2(register_num);
+parameter addr_width=32;
+
+localparam reg_width = $clog2(reg_num);
 localparam mem_depth = 4096;
 localparam  mem_width=8;
 localparam instr_width=32;
 localparam BPI= instr_width/mem_width;
 
-int Instruction_Count;
+int Total_Instr_Count;
 int Arithmetic_Instr_Count;
 int Logical_Instr_Count;
 int Mem_Instr_Count;
 int Branch_Instr_Count;
-int clockCount;
+int Clock_Count;
 int stalls;
 int Data_Hazards;
-int finalClockCount;
+
+logic [mem_depth-1:0] memWriteStatus;
+int Final_Clock_Count;
 
 typedef union packed{
   
@@ -32,13 +36,13 @@ typedef union packed{
     logic [reg_width-1:0] rs;
     logic [reg_width-1:0] rt;
     logic [reg_width-1:0] rd;
-    logic[10:0] invalid;
+    logic[10:0] unused;
   }R;
   
   struct packed{
     logic [reg_width-1:0] rs;
     logic [reg_width-1:0] rt;
-    logic [imm_size-1:0] imm;
+    logic [IMM_SIZE-1:0] imm;
   }I;
 
 }instruction;
@@ -57,11 +61,11 @@ typedef struct packed{
   logic rs2;
   logic jump;
   logic [2:0] aluop;
-}Control;
+}CTRL;
 
-//pipeline buffers
+
 struct packed{
-  logic [add_width-1:0] pc;
+  logic [addr_width-1:0] pc;
   Instruct instruction;  
 }Fetch_Buffer;
 
@@ -70,36 +74,38 @@ struct packed{
   logic [DATA-1:0] readData1;
   logic [DATA-1:0] readData2;
   logic [DATA-1:0] immOut;
-  logic [add_width-1:0] pc;
-  Control cntrl;
+  logic [addr_width-1:0] pc;
+  CTRL cntrl;
   logic haltSignal;
-  logic [reg_width-1:0] rd;
+  logic Forward_1;
+  logic Forward_2;
+  logic Mem_Forward_1;
+  logic Mem_Forward_2;
+  logic wb_Forward_1;
+  logic wb_Forward_2;
 }Decode_Buffer;
 
 struct packed {
-  Instruct instruction;
   logic [DATA-1:0] aluOut;
-  logic [add_width-1:0] branchAddress;
+  logic [addr_width-1:0] Branch_Address;
   logic [DATA-1:0] writeData;
-  Control cntrl;
-  logic branchTaken;
+  CTRL cntrl;
+  logic is_taken;
   logic haltSignal;
-  logic [reg_width-1:0] rd;
+
 }Execution_Buffer;
 
 struct packed{
-  Instruct instruction;
   logic [DATA-1:0] memDataOut;
   logic [DATA-1:0] writeBackData;
-  Control cntrl;
-  logic branchTaken;
+  CTRL cntrl;
+  logic is_taken;
   logic haltSignal;
-  logic [reg_width-1:0] rd;
 
-}Memory_Buffer;
+}Mem_Buffer;
 
 struct packed{
-Control cntrl;
+CTRL cntrl;
 }Cntrl_Buffer[2:0];
 
 struct packed{
@@ -107,33 +113,32 @@ struct packed{
   logic [reg_width-1:0] rs2;
   logic [reg_width-1:0] rd;
  
-} Read__Buffer[2:0];
+} Read_Buffer[2:0];
 
+struct packed{
+ Instruct instruction;
+}Instr_Buffer[2:0];
 
-
-task Total_Instruction_Count();
-  Instruction_Count = Instruction_Count + 1;
+task Count_Instruction();
+  Total_Instr_Count = Total_Instr_Count + 1;
 endtask
 
-task Arithmetic_Instruction_Count();
+task Count_Arithmetic_Instruction();
   Arithmetic_Instr_Count = Arithmetic_Instr_Count + 1;
 endtask
-task Logical_Instruction_Count();
+
+task Count_Logical_Instruction();
   Logical_Instr_Count = Logical_Instr_Count + 1;
 endtask
 
-task Mem_Instruction_Count();
+task Count_Memory_Instruction();
   Mem_Instr_Count = Mem_Instr_Count + 1;
 endtask
 
-task Branch_Instruction_Count();
+task Count_Branch_Instruction();
   Branch_Instr_Count = Branch_Instr_Count + 1;
 endtask
 
-
-task hazardDetection(Read__Buffer,rd1,rd2);
-  
-endtask
 
 endpackage
 `endif

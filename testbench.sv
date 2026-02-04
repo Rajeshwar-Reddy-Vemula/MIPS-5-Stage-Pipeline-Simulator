@@ -1,19 +1,19 @@
 module top();
   parameter CLOCK_PERIOD = 10;
-  localparam HALF_CYCLE = CLOCK_PERIOD/2;
+  localparam HALF_PERIOD = CLOCK_PERIOD/2;
 
-  bit clock;
+  bit clk;
   logic rst;
 
-  MIPS_Processor DUT(clock,rst);
+  MIPS_Processor DUT(clk,rst);
 
 
 
-  always #HALF_CYCLE clock = ~clock;
+  always #HALF_PERIOD clk = ~clk;
   initial 
     begin
       rst ='1;
-      repeat (2)@(posedge clock);
+      repeat (2)@(posedge clk);
       rst ='0;
     end
 

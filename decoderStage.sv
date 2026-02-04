@@ -1,282 +1,407 @@
 `include "mipspkg.sv"
 
-module InstrDecode(clock,rst,is_taken,pc,control_i,input_read, wr_en, instruction, wr_data, cntrl, imm_o, read_data1, read_data2,pc_o, rs1,rs2,rd, hazard_detected,halt_detected);
-  import Types::*;
+module InstrDecode(clk,rst,branch_taken,pc,inputCntrl,inputRd, en_write, instruction, data_write, cntrl, imm_o, read_data1, read_data2,pcOut, rs1,rs2,rd, hazard_detected,halt_signal, Forward_1, Forward_2,mem_Forward_1, mem_Forward_2,wb_Forward_1, wb_Forward_2,dec_instr);
+  import TYPES::*;
   
   input Instruct instruction;
-  input logic clock;
+  input logic clk;
   input logic rst;
-  input logic is_taken;
-  input logic [add_width-1:0] pc;
-  input logic [DATA-1:0] wr_data;
-  input logic wr_en;
-  input Control control_i;
-  input logic [reg_width-1:0] input_read;
+  input logic branch_taken;
+  input logic [addr_width-1:0] pc;
+  input logic [DATA-1:0] data_write;
+  input logic en_write;
+  output logic [reg_width-1:0] rs1, rs2;
+  output logic hazard_detected;
+  output logic halt_signal;
+  output logic Forward_1, Forward_2, mem_Forward_1, mem_Forward_2, wb_Forward_1, wb_Forward_2;
+  output Instruct dec_instr;
+  
+  input CTRL inputCntrl;
+  input logic [reg_width-1:0] inputRd;
   output logic [DATA-1:0] imm_o;
   output logic [DATA-1:0] read_data1;
   output logic [DATA-1:0] read_data2;
-  output logic [add_width-1:0] pc_o;
-  output Control cntrl;
+  output logic [addr_width-1:0] pcOut;
+  output CTRL cntrl;
   output logic [reg_width-1:0] rd;
-  output logic [reg_width-1:0] rs1, rs2;
-  output logic hazard_detected;
-  output logic halt_detected;
+  
   
   logic [1:0] count;
-  logic hazard; 
-  logic [1:0] waitCount;
-  bit set;
+  logic hazard;
+  logic [1:0] wait_count;
+  logic set;
+	logic[DATA-1:0] registerFile [reg_num-1:0];
+
   
-  logic[DATA-1:0] registerFile [register_num-1:0];
-  
+
+  always_ff@(negedge clk)
+    begin
+      read_data1 <= registerFile[rs1];
+      read_data2 <= registerFile[rs2];
+  end
+
   always_comb
     begin
-      if(!is_taken)
-       begin
-      
-      case(instruction.op_code) 
-        6'b000000: begin
-          
-          if(!halt_detected)
-          begin
-          Total_Instruction_Count();
-          Arithmetic_Instruction_Count();
-           end
-          rs1 = instruction.Type.R.rs;
-          rs2 = instruction.Type.R.rt;
-          rd = instruction.Type.R.rd;
-        end
-        6'b000001: begin
-          
-          if(!halt_detected)
+      if(!branch_taken)
+        begin
+        unique case(instruction.op_code) 
+          6'b000000: begin
+            
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Arithmetic_Instruction_Count();
+              Count_Instruction();
+              Count_Arithmetic_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = 'x;
-          rd =  instruction.Type.I.rt;
-        end
-        6'b000010: begin
+            rs1 = instruction.Type.R.rs;
+            rs2 = instruction.Type.R.rt;
+            rd = instruction.Type.R.rd;
+          end
+          6'b000001: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Arithmetic_Instruction_Count();
+              Count_Instruction();
+              Count_Arithmetic_Instruction();
             end
-          rs1 = instruction.Type.R.rs;
-          rs2 = instruction.Type.R.rt;
-          rd  = instruction.Type.R.rd;
-        end
+            rs1 = instruction.Type.I.rs;
+            rs2 = 'x;
+            rd =  instruction.Type.I.rt;
+          end
+          6'b000010: begin
+          
+            if(!halt_signal)
+            begin
+              Count_Instruction();
+              Count_Arithmetic_Instruction();
+            end
+            rs1 = instruction.Type.R.rs;
+            rs2 = instruction.Type.R.rt;
+            rd  = instruction.Type.R.rd;
+          end
 
-        6'b000011: begin
+          6'b000011: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Arithmetic_Instruction_Count();
+              Count_Instruction();
+              Count_Arithmetic_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 ='x;
-          rd  = instruction.Type.I.rt;
-        end
+            rs1 = instruction.Type.I.rs;
+            rs2 ='x;
+            rd  = instruction.Type.I.rt;
+          end
 
-        6'b000100: begin
+          6'b000100: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Arithmetic_Instruction_Count();
+              Count_Instruction();
+              Count_Arithmetic_Instruction();
             end
-          rs1 = instruction.Type.R.rs;
-          rs2 = instruction.Type.R.rt;
-          rd = instruction.Type.R.rd;
-        end
-        6'b000101: begin
+            rs1 = instruction.Type.R.rs;
+            rs2 = instruction.Type.R.rt;
+            rd = instruction.Type.R.rd;
+          end
+
+          6'b000101: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Arithmetic_Instruction_Count();
+              Count_Instruction();
+              Count_Arithmetic_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = 'x;
-          rd = instruction.Type.I.rt;
-        end
-        6'b000110: begin
+            rs1 = instruction.Type.I.rs;
+            rs2 = 'x;
+            rd = instruction.Type.I.rt;
+          end
+          6'b000110: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Logical_Instruction_Count();
+              Count_Instruction();
+              Count_Logical_Instruction();
             end
-          rs1 = instruction.Type.R.rs;
-          rs2 = instruction.Type.R.rt;
-          rd = instruction.Type.R.rd;
-        end
-        6'b000111: begin
+            rs1 = instruction.Type.R.rs;
+            rs2 = instruction.Type.R.rt;
+            rd = instruction.Type.R.rd;
+          end
+          6'b000111: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Logical_Instruction_Count();
+              Count_Instruction();
+              Count_Logical_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = 'x;
-          rd = instruction.Type.I.rt;
-        end
-        6'b001000: begin
+            rs1 = instruction.Type.I.rs;
+            rs2 = 'x;
+            rd = instruction.Type.I.rt;
+          end
+          6'b001000: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Logical_Instruction_Count();
+              Count_Instruction();
+              Count_Logical_Instruction();
             end
-          rs1 = instruction.Type.R.rs;
-          rs2 = instruction.Type.R.rt;
-          rd = instruction.Type.R.rd;
-        end
-        6'b001001: begin
+            rs1 = instruction.Type.R.rs;
+            rs2 = instruction.Type.R.rt;
+            rd = instruction.Type.R.rd;
+          end
+          6'b001001: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Logical_Instruction_Count();
+              Count_Instruction();
+              Count_Logical_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2='x;
-          rd = instruction.Type.I.rt;
-        end
-        6'b001010: begin
+            rs1 = instruction.Type.I.rs;
+            rs2='x;
+            rd = instruction.Type.I.rt;
+          end
+          6'b001010: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Logical_Instruction_Count();
+              Count_Instruction();
+              Count_Logical_Instruction();
             end
-          rs1 = instruction.Type.R.rs;
-          rs2 = instruction.Type.R.rt;
-          rd = instruction.Type.R.rd;
-        end
-        6'b001011: begin
+            rs1 = instruction.Type.R.rs;
+            rs2 = instruction.Type.R.rt;
+            rd = instruction.Type.R.rd;
+          end
+          6'b001011: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Logical_Instruction_Count();
+              Count_Instruction();
+              Count_Logical_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = 'x;
-          rd = instruction.Type.I.rt;
-        end
-        6'b001100: begin
+            rs1 = instruction.Type.I.rs;
+            rs2 = 'x;
+            rd = instruction.Type.I.rt;
+          end
+          6'b001100: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Mem_Instruction_Count();
+              Count_Instruction();
+              Count_Memory_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = 'x;
-          rd = instruction.Type.I.rt;
-        end
-        6'b001101: begin
+            rs1 = instruction.Type.I.rs;
+            rs2 = 'x;
+            rd = instruction.Type.I.rt;
+          end
+          6'b001101: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Mem_Instruction_Count();
+              Count_Instruction();
+              Count_Memory_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = instruction.Type.I.rt;
-          rd='x;
-        end
-        6'b001110: begin
+            rs1 = instruction.Type.I.rs;
+            rs2 = instruction.Type.I.rt;
+            rd='x;
+          end
+          6'b001110: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Branch_Instruction_Count();
+              Count_Instruction();
+              Count_Branch_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = 'x;
-          rd='x;
-        end
-        6'b001111: begin
+            rs1 = instruction.Type.I.rs;
+            rs2 = 'x;
+            rd='x;
+          end
+          6'b001111: begin
           
-          if(!halt_detected)
+            if(!halt_signal)
             begin
-          Total_Instruction_Count();
-          Branch_Instruction_Count();
+              Count_Instruction();
+              Count_Branch_Instruction();
             end
-          rs1 =  instruction.Type.I.rs;
-          rs2 = instruction.Type.I.rt;
-          rd='x;
-        end
-        6'b010000: begin
+            rs1 =  instruction.Type.I.rs;
+            rs2 = instruction.Type.I.rt;
+            rd='x;
+          end
+          6'b010000: begin
           
-          if(!halt_detected)
-            begin
-          Total_Instruction_Count();
-          Branch_Instruction_Count();
+            if(!halt_signal)
+              begin
+              Count_Instruction();
+              Count_Branch_Instruction();
             end
-          rs1 = instruction.Type.I.rs;
-          rs2 = 'x;
-          rd='x;
-        end
-        6'b010001: begin
+            rs1 = instruction.Type.I.rs;
+            rs2 = 'x;
+            rd='x;
+          end
+          6'b010001: begin
           
-          if(!halt_detected)
-            begin
-          Total_Instruction_Count();
-          Branch_Instruction_Count();
+            if(!halt_signal)
+              begin
+              Count_Instruction();
+              Count_Branch_Instruction();
               rs1='x;
               rs2 ='x;
               rd='x;
             end
-        end
-        default: begin
+          
+          end
+          default: begin
+            rs1 = 'x;
+            rs2 = 'x;
+            rd = 'x;
+          end
+        endcase
+      end
+      else 
+        begin
           rs1 = 'x;
           rs2 = 'x;
           rd = 'x;
-        end
-
-      endcase
-        end
-      else 
-        begin
-           rs1 = 'x;
-          rs2 = 'x;
-          rd = 'x;
-        end
-    end
+      end
+  end
   
-  always_ff@(posedge clock)
+  
+  
+  always_comb
     begin
-      if(rst)
-        begin
-          for(int i=0; i < register_num; i++)
-            begin
-             registerFile[i] <= '0;
-            end
-        end
-      else if(control_i.regWrite)
-        begin
-        registerFile[input_read] <= wr_data;
-        end
-      else
-        begin
-          registerFile[input_read] <= registerFile[input_read];
-        end
-    end
-  always_ff@(negedge clock)
-    begin
-      read_data1 <= registerFile[rs1];
-      read_data2 <= registerFile[rs2];
+      unique case(instruction.op_code)
+        6'b000001: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b000011: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b000101: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b000111: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b001001: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b001011: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b001100: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b001101: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b001110: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        6'b001111: imm_o={{DATA-IMM_SIZE{instruction.Type.I.imm[IMM_SIZE-1]}},instruction.Type.I.imm};
+        default : imm_o = 'x;
+      endcase
     end
   
   always_comb
     begin
+
+      if(rs1==Read_Buffer[0].rd || rs2==Read_Buffer[0].rd )
+        begin
+            if(Instr_Buffer[0].instruction.op_code==6'h0C || instruction.op_code!==6'h09 ) begin
+                count=2'b10;
+                hazard ='1;
+            end
+        end
+      else if (rs1==Read_Buffer[1].rd || rs2==Read_Buffer[1].rd)
+        begin
+          if(Instr_Buffer[0].instruction.op_code!==6'h09 || instruction.op_code!==6'h09 ) begin
+            count =2'b10;
+            hazard ='1;
+          end
+      end
+      else  hazard = '0;
+    end
+
+  always_comb
+    begin
+      if(hazard || set=='1) hazard_detected ='1;
+      else  hazard_detected = '0;
+
+      if(wait_count == count) hazard_detected = '0;
+  end
+
+  always_comb
+    begin
+      if(rs1==Read_Buffer[0].rd )
+        begin
+          if(Instr_Buffer[0].instruction.op_code!==6'h0C )
+            begin
+              Forward_1 ='1;
+              Forward_2 = '0;
+              mem_Forward_1 ='0;
+              mem_Forward_2='0;
+              wb_Forward_1 ='0;
+              wb_Forward_2 ='0;
+            end
+      end
+      else if( rs2==Read_Buffer[0].rd)
+        begin
+         if(Instr_Buffer[0].instruction.op_code!==6'h0C)
+           begin
+              Forward_1 ='0;
+              Forward_2 = '1;
+              mem_Forward_1 ='0;
+              mem_Forward_2='0;
+              wb_Forward_1 ='0;
+              wb_Forward_2 ='0;
+            end
+      end
+      else
+        begin
+          Forward_1 ='0;
+          Forward_2 = '0;
+          mem_Forward_1 ='0;
+          mem_Forward_2='0;
+          wb_Forward_1 ='0;
+          wb_Forward_2 ='0;
+      end
+
+  end
+  
+  always_ff@(posedge clk)
+    begin
+      if(rst)
+        begin
+          for(int i=0; i < reg_num; i++)
+            begin
+             registerFile[i] <= '0;
+          end
+      end
+      else if(inputCntrl.regWrite)
+        begin
+        registerFile[inputRd] <= data_write;
+      end
+      else
+        begin
+          registerFile[inputRd] <= registerFile[inputRd];
+      end
+  end
+  
+  
+  always_ff@(posedge clk)
+  begin
+    if(hazard && set=='0)
+      begin
+      wait_count <='0;
+      set <='1;
+      end
+    else if( set=='1 && wait_count!==count)
+      begin
+        wait_count <= wait_count + 1'b1;
+      end
+    else 
+      begin
+      set<=0;
+      wait_count <='0;
+    end
+
+    if(set=='1 && wait_count!==count && (Forward_1 =='0 && Forward_2 =='0) && hazard_detected=='1)
+      begin
+        stalls <= stalls +1;
+      end
+  end
+
+  always_comb
+    begin
+      if(Forward_1=='0 && Forward_2=='0 && hazard =='1)
+        begin
+          Data_Hazards = Data_Hazards + 1;
+        end
+    end
+	
+	always_comb
+    begin
+     
+     
       case(instruction.op_code)
         6'h00 : begin
           
@@ -444,98 +569,25 @@ module InstrDecode(clock,rst,is_taken,pc,control_i,input_read, wr_en, instructio
           6'h11 : begin
             
             cntrl.memWriteEnable ='0;
-            cntrl.regWrite='0;            
+            cntrl.regWrite='0;
             cntrl.rs2 = '1;
             cntrl.jump = '0;
             cntrl.aluop= 3'b000;
-            halt_detected ='1;
+            halt_signal ='1;
           end
         default: begin
                   cntrl.regWrite='0;
                  cntrl.memWriteEnable='0;
-                 halt_detected='0;
+                 halt_signal='0;
                  cntrl.aluop='x;
                  cntrl.jump ='0;
                  cntrl.rs2 ='x;
                  end
           endcase
           end
-
-    always_comb
-    begin
-      unique case(instruction.op_code)
-        6'b000001: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b000011: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b000101: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b000111: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b001001: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b001011: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b001100: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b001101: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b001110: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        6'b001111: imm_o={{DATA-imm_size{instruction.Type.I.imm[imm_size-1]}},instruction.Type.I.imm};
-        default : imm_o = 'x;
-      endcase
-    end
   
-  always_comb
-    begin
-      if(rs1==Read__Buffer[0].rd || rs2==Read__Buffer[0].rd)
-        begin
-          count=2'b10;
-          hazard ='1;
-        end
-      else if (rs1==Read__Buffer[1].rd || rs2==Read__Buffer[1].rd)
-        begin
-          count =2'b01;
-          hazard ='1;
-        end
-      else
-        begin
-          hazard = '0;
-        end
-
-    end
-
-  always_ff@(posedge clock)
-  begin
-    if(hazard && set=='0)
-      begin
-      waitCount <='0;
-      set <='1;
-      end
-    else if( set=='1 && waitCount!==count)
-      begin
-        waitCount <= waitCount + 1'b1;
-        stalls <= stalls+1;
-      end
-    else 
-      begin
-      set<=0;
-      waitCount <='0;
-      end
-  end
-  always_comb
-    begin
-      if(hazard || set=='1)
-         begin
-        hazard_detected ='1;
-         end
-      else 
-        hazard_detected='0;
-        
-      if(waitCount == count)
-        hazard_detected = '0;
-       
-    end
-  always_comb
-    begin
-      if(set)
-      Data_Hazards = Data_Hazards+1;
-    end
   
-  assign pc_o = pc;
- 
-    
+  assign pcOut = pc;
+  assign dec_instr = instruction;
   
 endmodule
