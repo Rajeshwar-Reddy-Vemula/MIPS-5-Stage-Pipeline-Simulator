@@ -1,0 +1,165 @@
+cd {/u/koushik/mipscomparch/MIPS-Lite-5-Stage-Pipeline-Simualtor/Non-Forwarding Functional Simulator}
+do run.do
+# ** Warning: (vlib-34) Library already exists at "work".
+# QuestaSim-64 vlog 2019.2_1 Compiler 2019.05 May 13 2019
+# Start time: 15:41:40 on Jun 04,2024
+# vlog -reportprogress 300 mipspkg.sv 
+# -- Compiling package Types
+# 
+# Top level modules:
+# 	--none--
+# End time: 15:41:41 on Jun 04,2024, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# QuestaSim-64 vlog 2019.2_1 Compiler 2019.05 May 13 2019
+# Start time: 15:41:41 on Jun 04,2024
+# vlog -reportprogress 300 design.sv 
+# -- Compiling package Types
+# -- Compiling module InstrFetch
+# -- Importing package Types
+# -- Compiling module InstrDecode
+# -- Compiling module Execute
+# -- Compiling module MemAccess
+# -- Compiling module WriteBack
+# -- Compiling module MIPS_Processor
+# 
+# Top level modules:
+# 	MIPS_Processor
+# End time: 15:41:41 on Jun 04,2024, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# QuestaSim-64 vlog 2019.2_1 Compiler 2019.05 May 13 2019
+# Start time: 15:41:41 on Jun 04,2024
+# vlog -reportprogress 300 testbench.sv 
+# -- Compiling module top
+# 
+# Top level modules:
+# 	top
+# End time: 15:41:41 on Jun 04,2024, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim work.top 
+# Start time: 15:41:41 on Jun 04,2024
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# ** Warning: executionStage.sv(89): (vopt-3838) Variable 'cntrl.jump' written by continuous and procedural assignments. 
+# One of the assignments is implicit. See executionStage.sv(12). 
+# ** Warning: executionStage.sv(45): (vopt-2182) 'cntrl[3]' might be read before written in always_comb or always @* block.
+# Loading sv_std.std
+# Loading work.Types(fast)
+# Loading work.top(fast)
+# ** Note: $finish    : writeBackStage.sv(29)
+#    Time: 20195 ns  Iteration: 2  Instance: /top/DUT/WB
+# 1
+# Break at writeBackStage.sv line 29
+do run.do
+# ** Warning: (vlib-34) Library already exists at "work".
+# QuestaSim-64 vlog 2019.2_1 Compiler 2019.05 May 13 2019
+# Start time: 15:41:56 on Jun 04,2024
+# vlog -reportprogress 300 mipspkg.sv 
+# -- Compiling package Types
+# 
+# Top level modules:
+# 	--none--
+# End time: 15:41:56 on Jun 04,2024, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# QuestaSim-64 vlog 2019.2_1 Compiler 2019.05 May 13 2019
+# Start time: 15:41:56 on Jun 04,2024
+# vlog -reportprogress 300 design.sv 
+# -- Compiling package Types
+# -- Compiling module InstrFetch
+# -- Importing package Types
+# -- Compiling module InstrDecode
+# -- Compiling module Execute
+# -- Compiling module MemAccess
+# -- Compiling module WriteBack
+# -- Compiling module MIPS_Processor
+# 
+# Top level modules:
+# 	MIPS_Processor
+# End time: 15:41:56 on Jun 04,2024, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# QuestaSim-64 vlog 2019.2_1 Compiler 2019.05 May 13 2019
+# Start time: 15:41:56 on Jun 04,2024
+# vlog -reportprogress 300 testbench.sv 
+# -- Compiling module top
+# 
+# Top level modules:
+# 	top
+# End time: 15:41:57 on Jun 04,2024, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# --------------------------------------------------------------------------
+# 			     Pipeline Without Forwarding 			
+# --------------------------------------------------------------------------
+# 
+# --------------------------------------------------------------------------
+# 
+# 			 Instruction Counts                             
+# --------------------------------------------------------------------------
+# Total Number of Instructions = 910
+# Total Number of Arithmetic Instructions = 375
+# Total Number of Logical Instructions = 61
+# Total Number of Memory access instruction = 300
+# Total Number of Control transfer instruction = 174
+# 
+# -----------------------------------------------
+# 
+#  Final Register Status 
+# -----------------------------------------------
+# Program Counter = 112
+# R0 = 0
+# R1 = 0
+# R2 = 0
+# R3 = 0
+# R4 = 0
+# R5 = 0
+# R6 = 0
+# R7 = 0
+# R8 = 0
+# R9 = 0
+# R10 = 0
+# R11 = 1044
+# R12 = 1836
+# R13 = 2640
+# R14 = 25
+# R15 = -188
+# R16 = 213
+# R17 = 29
+# R18 = 3440
+# R19 = -1
+# R20 = -2
+# R21 = -1
+# R22 = 76
+# R23 = 3
+# R24 = -1
+# R25 = 3
+# R26 = 0
+# R27 = 0
+# R28 = 0
+# R29 = 0
+# R30 = 0
+# R31 = 0
+# -----------------------------------------------
+# 
+#  Final Memory State 
+# -----------------------------------------------
+# Address = 1400 Contents =0
+# Address = 1404 Contents =0
+# Address = 1408 Contents =0
+# -----------------------------------------------
+# 
+#  Timing Simulator 
+# -----------------------------------------------
+# 
+# Total number of clock Cycles = 1782
+# STALLS=557
+# Total Data Hazards=309
+# -----------------------------------------------
+# End time: 15:41:59 on Jun 04,2024, Elapsed time: 0:00:18
+# Errors: 0, Warnings: 2
+# vsim work.top 
+# Start time: 15:41:59 on Jun 04,2024
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# Loading sv_std.std
+# Loading work.Types(fast)
+# Loading work.top(fast)
+# ** Note: $finish    : writeBackStage.sv(29)
+#    Time: 20195 ns  Iteration: 2  Instance: /top/DUT/WB
+# 1
+# Break at writeBackStage.sv line 29

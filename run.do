@@ -1,10 +1,10 @@
 vlib work
-vlog mips_pkg.sv
-vlog Design.sv
-vlog tb.sv
+vlog mipspkg.sv
+vlog design.sv
+vlog testbench.sv
 #vlog instructionFetch.sv
 #vlog memStage.sv
 
-vsim work.tb
+vsim work.top
 
 run -all

@@ -1,6 +1,6 @@
 # Makefile
-RTL= mips_pkg.sv Design.sv
-TB= tb.sv
+RTL= mipspkg.sv design.sv
+TB= testbench.sv
 work= work #library name  
 VSIMBATCH= -c -do "run -all; exit"
 
@@ -11,7 +11,7 @@ compile:
 	vlog  $(RTL) $(TB)
 	
 sim:
-	vsim $(VSIMBATCH) work.tb
+	vsim $(VSIMBATCH) work.top
 
 		
 clean:
